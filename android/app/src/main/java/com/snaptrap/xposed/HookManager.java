@@ -87,12 +87,11 @@ public class HookManager implements IXposedHookLoadPackage, IXposedHookInitPacka
                 findAndHookMethod(className, lpparam.classLoader, methodName, typesAndCallback, new XC_MethodReplacement() {
                     @Override
                     protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                        if (Settings.getDisableScreenshot()) {
-                            Logging.log("Screenshot detected, replacing method with null return.");
-                            return null;
-                        } else {
+                        if (!Settings.getDisableScreenshot()) {
                             Method snapMethod = (Method) param.method;
                             XposedBridge.invokeOriginalMethod(snapMethod, param.thisObject, param.args);
+                        } else {
+                            Logging.log("Screenshot detected, replacing method with null return.");
                         }
                         return null;
                     }

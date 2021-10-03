@@ -1,6 +1,7 @@
 package com.snaptrap;
 
 import android.net.Uri;
+import android.util.DebugUtils;
 import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.file.DocumentFileCompat;
@@ -11,6 +12,9 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 

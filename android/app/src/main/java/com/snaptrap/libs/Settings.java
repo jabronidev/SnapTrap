@@ -1,7 +1,12 @@
 package com.snaptrap.libs;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 
+
+import androidx.loader.content.CursorLoader;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -9,12 +14,15 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.snaptrap.MainApplication;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,6 +79,23 @@ public class Settings extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             Logging.log("ERROR " + e.getMessage());
             return settingsLocation;
+        }
+    };
+
+    public static boolean setSavingPath(String path) {
+        try {
+            Map<String, Object> settings = new HashMap<>();
+            settings = gson.fromJson(new FileReader(jsonSettings), settings.getClass());
+            settings.remove("saveLocation");
+            settings.put("saveLocation", new URI(path).getPath());
+
+            Writer writer = new FileWriter(jsonSettings);
+            gson.toJson(settings, writer);
+            writer.close();
+            return true;
+        } catch (Exception e) {
+            Logging.log("ERROR " + e.getMessage());
+            return false;
         }
     };
 
@@ -131,8 +156,18 @@ public class Settings extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public static void exportVerifySettingsFile(Promise promise) {
+        promise.resolve(verifySettingsFile());
+    }
+
+    @ReactMethod
     public static void exportGetSavingPath(Promise promise) {
         promise.resolve(getSavingPath());
+    }
+
+    @ReactMethod
+    public static void exportSetSavingPath(String path, Promise promise) {
+        promise.resolve(setSavingPath(path));
     }
 
     @ReactMethod
@@ -155,78 +190,5 @@ public class Settings extends ReactContextBaseJavaModule {
         promise.resolve(getDisableScreenshot());
     }
 
-    /**
-     * React Native exports.
-     * These functions are separate to the ones above so they can be used in async fashion in React Native.
-     */
 
-    /*@ReactMethod
-    public static void exportGetSavingPath(Promise promise) {
-        try {
-            promise.resolve(sharedPref.getString("savePath", String.format("%s/SnapTrap/", Environment.getExternalStorageDirectory())));
-        } catch (Exception e) {
-            XposedBridge.log("[SnapTrap]: ERROR " + e.getMessage());
-            promise.reject(e);
-        }
-    };
-
-    public static void exportGetBool(String name, Promise promise) {
-        if (name == null) {
-            promise.reject(new Exception("Missing parameter."));
-            return;
-        }
-
-        try {
-            promise.resolve(sharedPref.getBoolean(name, true));
-        } catch (Exception e) {
-            XposedBridge.log("[SnapTrap]: ERROR " + e.getMessage());
-            promise.reject(e);
-        }
-    };
-
-    public static void exportSetBool(String name, Boolean bool, Promise promise) {
-        if (name == null || bool == null) {
-            promise.reject(new Exception("Missing parameter."));
-            return;
-        }
-
-        try {
-            editor.putBoolean(name, bool);
-            editor.commit();
-            promise.resolve(null);
-        } catch (Exception e) {
-            XposedBridge.log("[SnapTrap]: ERROR " + e.getMessage());
-            promise.reject(e);
-        }
-    };
-
-    public static void exportGetString(String name, Promise promise) {
-        if (name == null) {
-            promise.reject(new Exception("Missing parameter."));
-            return;
-        }
-
-        try {
-            promise.resolve(sharedPref.getString(name, ""));
-        } catch (Exception e) {
-            XposedBridge.log("[SnapTrap]: ERROR " + e.getMessage());
-            promise.reject(e);
-        }
-    }
-
-    public static void exportSetString(String name, String value, Promise promise) {
-        if (name == null || value == null) {
-            promise.reject(new Exception("Missing parameter."));
-            return;
-        }
-
-        try {
-            editor.putString(name, value);
-            editor.commit();
-            promise.resolve(null);
-        } catch (Exception e) {
-            XposedBridge.log("[SnapTrap]: ERROR " + e.getMessage());
-            promise.reject(e);
-        }
-    }*/
 }

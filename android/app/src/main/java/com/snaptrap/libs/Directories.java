@@ -3,6 +3,7 @@ package com.snaptrap.libs;
 import static com.snaptrap.libs.FileCopy.copySnapMedia;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;

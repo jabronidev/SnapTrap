@@ -6,6 +6,8 @@ import ImageView from "react-native-image-viewing";
 import { selectDirectory } from 'react-native-directory-picker';
 import DefaultPreference from 'react-native-default-preference';
 import { fetchImagesPath, fetchUriImagesPath } from '../libs/Images';
+import { NativeModules } from 'react-native';
+const { SnapSettings } = NativeModules;
 
 export const SnapScreen = () => {
 	const [snapImages, setImages] = useState([])
@@ -14,20 +16,11 @@ export const SnapScreen = () => {
 	const [imgIndex, setIndex] = useState(false);
 
 	useEffect(async () => {
-		/**
-		 * TODO: Clean up this mess.
-		 */
-		LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
-		if (DefaultPreference != null) {
-			DefaultPreference.get('savedUri').then(async(uri) => {
-				if (uri) {
-					const imgs = await fetchImagesPath(uri)
-					const uriImgs = await fetchUriImagesPath(uri)
-					setImages(imgs)
-					setUriImages(uriImgs)
-				}
-			})
-		}
+		const saveUri = await SnapSettings.exportGetSavingPath();
+		const imgs = await fetchImagesPath(saveUri)
+		const uriImgs = await fetchUriImagesPath(saveUri)
+		setImages(imgs)
+		setUriImages(uriImgs)
 	}, [])
 
 	return (
@@ -36,18 +29,14 @@ export const SnapScreen = () => {
 				style={styles.btn}
 				size='small'
 				onPress={async () => {
-					/**
-					 * TODO: Clean up this mess.
-					 */
 					setImages([])
 					setUriImages([])
 					const uri = await selectDirectory()
-					DefaultPreference.set('savedUri', uri).then(async () => {
-						const uriImgs = await fetchUriImagesPath(uri)
-						const imgs = await fetchImagesPath(uri)
-						setImages(imgs)
-						setUriImages(uriImgs)
-					})
+					await SnapSettings.exportSetSavingPath(uri);
+					const uriImgs = await fetchUriImagesPath(uri)
+					const imgs = await fetchImagesPath(uri)
+					setImages(imgs)
+					setUriImages(uriImgs)
 				}}
 			>
 				CHANGE SAVE FOLDER
